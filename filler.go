@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -26,9 +25,6 @@ func main() {
 		log.Fatalf("Error creating the client: %s", err)
 	}
 
-	var wg sync.WaitGroup
-	rand.Seed(42)
-
 	file, err := os.Open("source/data.txt")
 	if err != nil {
 		log.Fatalf("failed opening file: %s", err)
@@ -43,6 +39,7 @@ func main() {
 	col_names := strings.Fields(scanner.Text())
 	// Fill database
 	i := 1
+	var wg sync.WaitGroup
 	for scanner.Scan() {
 		wg.Add(1)
 		line := scanner.Text()
