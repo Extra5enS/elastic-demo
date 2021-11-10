@@ -4,34 +4,29 @@ In this repository you can find demo programs for working with Elasticsearch ser
 ## Server start
 First you need to raise the dockers server, this can be done using a makefile.
 ```
-sudo make default-server-start
+sudo make
 ```
 
 ## filler.go
-Next, you need to fill the server with data. In this case, the server has a single data stream with the index "test". You can use make to do it.
+Next, you need to fill the server with data. In this case, the server has a single data stream with the index "test". You can use this commend to do it.
 ```
-> make all
+go run filler.go
 ```
-Or you can use golang program.
-```
-> go run filler.go
-```
-*The first two actions can be combined with a single make call.*
 
 ## simple-search.go
 The first example shows the easiest way to use search. You can **match** the lines with values that you need. This requests calculate  **_score** for every matched line, so the result is sorted begins with the most similar result.
 
 Use comment to look at the result
 ```
-> go run simple-search.go
+go run simple-search.go
 ```
 
 ## filter-demo.go
-Next example shows abilities  of **filter**. You can use **temp** to match lines. In this case **_score** isn't calculated so the result isn't sorted. Next you can use **range** to find lines this fields in some range. Special  words here are: **lt**(<), **gt**(>), **e**(=). **e** being written after **lt** and **gt** to create **lte**(<=) and **gte** (>=).
+Next example shows abilities  of **filter**. You can use **temp** to match lines. In this case **_score** isn't calculated so the result isn't sorted. Next you can use **range** to find lines this fields in some range. Special  words here are: **lt** (<), **gt** (>), **e** (=). **e** being written after **lt** and **gt** to create **lte** (<=) and **gte** (>=).
 
 Use comment to look at the result
 ```
-> go run filter-demo.go
+go run filter-demo.go
 ```
 
 ## sort-demo.go
@@ -39,7 +34,7 @@ Last example shows how we can **sort** results. After filter call result isn't s
 
 Use comment to look at the result
 ```
-> go run sort-demo.go
+go run sort-demo.go
 ```
 
 ## Goodluck 
