@@ -19,7 +19,7 @@ Or you can use golang program.
 *The first two actions can be combined with a single make call.*
 
 ## simple-search.go
-The Fisrt example shows the easiest way to use search. You can **match** the lines with values that you need. This requests calculate  **_score** for every matched line, so the result is sorted begins with the most similar result.
+The first example shows the easiest way to use search. You can **match** the lines with values that you need. This requests calculate  **_score** for every matched line, so the result is sorted begins with the most similar result.
 
 Use comment to look at the result
 ```
@@ -27,7 +27,7 @@ Use comment to look at the result
 ```
 
 ## filter-demo.go
-Next example shows abilitis of **filter**. You can use **temp** to match lines. In this case **_score** isn't calculated so the result isn't sorted. Next you can use **range** to find lines this fileds in some range. Speciale words here are: **lt**(<), **gt**(>), **e**(=). **e** being written after **lt** and **gt** to create **lte**(<=) and **gte** (>=).
+Next example shows abilities  of **filter**. You can use **temp** to match lines. In this case **_score** isn't calculated so the result isn't sorted. Next you can use **range** to find lines this fields in some range. Special  words here are: **lt**(<), **gt**(>), **e**(=). **e** being written after **lt** and **gt** to create **lte**(<=) and **gte** (>=).
 
 Use comment to look at the result
 ```
@@ -35,7 +35,7 @@ Use comment to look at the result
 ```
 
 ## sort-demo.go
-Last example shows how we can **srote** results. After **filter** call result isn't sort, so we can fix this problem. **sort** define the order of sort's rolls. Result will be sorted by first condiotion. If the is equle values, requets will use next condiotion and so on. You can use keywords **asc** or **desc** to set ascending order or descending order.
+Last example shows how we can **sort** results. After filter call result isn't sort, so we can fix this problem. **sort** define the order of sorts rolls. Result will be sorted by first condition. If the is equal values, requests will use next condition and so on. You can use keywords **asc** or **desc** to set ascending order or descending order.
 
 Use comment to look at the result
 ```
