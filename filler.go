@@ -15,6 +15,11 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 )
 
+func isNumeric(s string) bool {
+	_, err := strconv.ParseFloat(s, 64)
+	return err == nil
+}
+
 func main() {
 
 	log.Println("I will fill your database with some data")
@@ -52,7 +57,11 @@ func main() {
 				if i != 0 {
 					body = body + `, `
 				}
-				body = body + fmt.Sprintf(`"%s":"%s"`, col_names[i], field)
+				if isNumeric(field) {
+					body = body + fmt.Sprintf(`"%s":%s`, col_names[i], field)
+				} else {
+					body = body + fmt.Sprintf(`"%s":"%s"`, col_names[i], field)
+				}
 			}
 			body = body + `}`
 

@@ -14,7 +14,7 @@ one         4567       8        twelve
 love        7889       6        thirteen
 с/c++       2222       4        fourteen
 stace       1000       1        fiveteen
-test        0999       5        sixteen
+test         999       5        sixteen
 Test        1101       8        seventeen
 test        7777       9        eighteen
-TEST        0001       0        nineteen
+TEST           1       0        nineteen
