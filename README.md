@@ -1,12 +1,27 @@
 # elastic-demo
 In this repository you can find demo programs for working with Elasticsearch server.
 
-## Server start
+## Cluster start
 First you need to raise the dockers server, this can be done using a makefile.
+
+### Cluster with 3 nodes 
+For cluster with 3 nodes we will uses ```docker-compose```, it's already written in Makefile, so you can use it. 
 ```
 sudo make
 ```
-
+To shutdown it also use make
+```
+sudo make clear
+```
+### Single node Cluster
+For single node cluster we create network and up docker by hand. So you can use next expation:
+```
+sudo make docker-single-node
+```
+To shutdown it also use make
+```
+sudo make clear-single-node
+```
 ## filler.go
 Next, you need to fill the server with data. In this case, the server has a single data stream with the index "test". You can use this commend to do it.
 ```
