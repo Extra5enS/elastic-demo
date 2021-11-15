@@ -43,6 +43,7 @@ func main() {
 	}
 	col_names := strings.Fields(scanner.Text())
 	// Fill database
+
 	i := 1
 	var wg sync.WaitGroup
 	for scanner.Scan() {
