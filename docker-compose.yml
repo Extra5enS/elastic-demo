@@ -12,13 +12,13 @@ services:
       - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - path.data=/usr/share/elasticsearch/data
+      # - path.data=/usr/share/elasticsearch/data
     ulimits:
       memlock:
         soft: -1
         hard: -1
-    #volumes:
-    #  - data01:/usr/share/elasticsearch/data
+    volumes:
+      - data01:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
     networks:
@@ -33,13 +33,13 @@ services:
       - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - path.data=/usr/share/elasticsearch/data
+      # - path.data=/usr/share/elasticsearch/data
     ulimits:
       memlock:
         soft: -1
         hard: -1
-    #volumes:
-    #  - data02:/usr/share/elasticsearch/data
+    volumes:
+      - data02:/usr/share/elasticsearch/data
     networks:
       - elastic
   es03:
@@ -52,13 +52,13 @@ services:
       - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - path.data=/usr/share/elasticsearch/data
+      # - path.data=/usr/share/elasticsearch/data
     ulimits:
       memlock:
         soft: -1
         hard: -1
-    #volumes:
-    #  - data03:/usr/share/elasticsearch/data
+    volumes:
+      - data03:/usr/share/elasticsearch/data
     networks:
       - elastic
 
