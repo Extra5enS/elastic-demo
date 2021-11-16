@@ -42,8 +42,43 @@ func main() {
 		log.Fatalf("Empty file")
 	}
 	col_names := strings.Fields(scanner.Text())
-	// Fill database
 
+	res, err := es.Indices.Create(
+		"test",
+		es.Indices.Create.WithBody(strings.NewReader(`{
+			"mappings": {
+				"properties": {
+					"title": {
+						"type": "text"
+					},
+					"text": {
+						"type": "integer"
+					},       
+					"myID": {
+						"type": "integer"
+					},    
+					"word": {
+						"type": "text"
+					}
+				}
+			},
+			"settings": {
+				"index": {
+					"number_of_shards": 3,  
+					"number_of_replicas": 2 
+				}
+			}
+		}`,
+		)),
+	)
+
+	if err != nil {
+		log.Printf("new mapping creation error: %s", err)
+	} else {
+		log.Println(res)
+	}
+	defer res.Body.Close()
+	// Fill database
 	i := 1
 	var wg sync.WaitGroup
 	for scanner.Scan() {
