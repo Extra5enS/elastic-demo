@@ -13,6 +13,8 @@ To shutdown it also use make
 ```
 sudo make clear
 ```
+If you have some problems [doc](https://www.elastic.co/guide/en/elasticsearch/reference/7.15/docker.html) may help you!
+
 ### Single node Cluster
 For single node cluster we create network and up docker by hand. So you can use next expation:
 ```
@@ -27,7 +29,10 @@ Next, you need to fill the server with data. In this case, the server has a sing
 ```
 go run filler.go
 ```
-Here we use Dynamic Mapping, which defines fields and their types when added. It is important that he remembers the type of the field and when trying to change it, he may give an incorrect result or error.
+Now filler.go use explicit mapping, where you can write more information about data.
+If types of data change, you must rewrite body of creation request. If index is already exist, request will return error, **but filler will continue work**. 
+
+Also creation request give ability to set number of replicas and shades for every index. Now you can experiment with fail-tolerens of you cluster.
 
 ## simple-search.go
 The first example shows the easiest way to use search. You can **match** the lines with values that you need. This requests calculate  **_score** for every matched line, so the result is sorted begins with the most similar result.
@@ -54,6 +59,12 @@ Use comment to look at the result
 go run sort-demo.go
 ```
 **sort** throws an error if it has nothing to sort, that is, if nothing was found as a result of the search or filtering
+
+## deleter.go
+If you want to experiment with data in ```index="test"``` you may reuse filler.go to update data or add something new. But that may work not for all changes, so use delete.go to remove all data and setting for this data structure
+```
+go run deleter.go
+```
 
 ## Links
 
