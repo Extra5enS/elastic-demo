@@ -86,12 +86,12 @@ func main() {
 			},
 			"settings": {
 				"index": {
-					"number_of_shards": 3,  
-					"number_of_replicas": 0 
+					"number_of_shards": 2,  
+					"number_of_replicas": 1 
 				}
 			}
 		}`,
-		)), // "number_of_replicas" should be equil to 2, use 1 only for experiment
+		)), // !!!"number_of_replicas" should be equil to 1, use 0 only for experiment!!!
 	)
 
 	if err != nil {
