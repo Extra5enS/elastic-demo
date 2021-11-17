@@ -3,13 +3,17 @@ package main
 import (
 	"bufio"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/elastic/go-elasticsearch/v8/esapi"
@@ -25,9 +29,27 @@ func main() {
 	log.Println("I will fill your database with some data")
 	log.Println(strings.Repeat("-", 37))
 	// Create default Client
-	es, err := elasticsearch.NewDefaultClient()
+	cfg := elasticsearch.Config{
+		Addresses: []string{
+			"http://localhost:9200",
+			//"http://localhost:9201",
+			//"http://localhost:9202",
+		},
+		Transport: &http.Transport{
+			MaxIdleConnsPerHost:   10,
+			ResponseHeaderTimeout: time.Second,
+			DialContext:           (&net.Dialer{Timeout: time.Second}).DialContext,
+			TLSClientConfig: &tls.Config{
+				MaxVersion:         tls.VersionTLS11,
+				InsecureSkipVerify: true,
+			},
+		},
+	}
+	es, err := elasticsearch.NewClient(cfg)
 	if err != nil {
 		log.Fatalf("Error creating the client: %s", err)
+	} else {
+		//log.Println(es.Info())
 	}
 
 	file, err := os.Open("source/data.txt")
@@ -65,11 +87,11 @@ func main() {
 			"settings": {
 				"index": {
 					"number_of_shards": 3,  
-					"number_of_replicas": 2 
+					"number_of_replicas": 0 
 				}
 			}
 		}`,
-		)),
+		)), // "number_of_replicas" should be equil to 2, use 1 only for experiment
 	)
 
 	if err != nil {
@@ -77,6 +99,8 @@ func main() {
 	} else {
 		log.Println(res)
 	}
+	log.Println(strings.Repeat("-", 37))
+
 	defer res.Body.Close()
 	// Fill database
 	i := 1
@@ -125,7 +149,7 @@ func main() {
 					log.Printf("Error parsing the response body: %s", err)
 				} else {
 					// Print the response status and indexed document version.
-					log.Printf("[%s] %s; version=%d", res.Status(), r["result"], int(r["_version"].(float64)))
+					log.Printf("{i=%d} [%s] %s; version=%d", i, res.Status(), r["result"], int(r["_version"].(float64)))
 				}
 			}
 		}(i, line, col_names)
