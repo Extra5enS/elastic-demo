@@ -8,10 +8,11 @@ services:
     environment:
       - node.name=es01
       - cluster.name=es-docker-cluster
-      - discovery.seed_hosts=es02,es03
+      - discovery.seed_hosts=es02,es03,ingest01,ingest02
       - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      # - network.host=127.0.0.1::9200
       # - path.data=/usr/share/elasticsearch/data
     ulimits:
       memlock:
@@ -19,20 +20,20 @@ services:
         hard: -1
     volumes:
       - data01:/usr/share/elasticsearch/data
-    ports:
-      - 9200:9200
     networks:
       - elastic
+
   es02:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
     container_name: es02
     environment:
       - node.name=es02
       - cluster.name=es-docker-cluster
-      - discovery.seed_hosts=es01,es03
+      - discovery.seed_hosts=es01,es03,ingest01,ingest02
       - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      # - network.host=127.0.0.1::9201
       # - path.data=/usr/share/elasticsearch/data
     ulimits:
       memlock:
@@ -40,29 +41,75 @@ services:
         hard: -1
     volumes:
       - data02:/usr/share/elasticsearch/data
-    # ports:
-    #   - 9201:9201
     networks:
       - elastic
+
   es03:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
     container_name: es03
     environment:
       - node.name=es03
       - cluster.name=es-docker-cluster
-      - discovery.seed_hosts=es01,es02
+      - discovery.seed_hosts=es01,es02,ingest01,ingest02
       - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      # - network.host=127.0.0.1::9202
       # - path.data=/usr/share/elasticsearch/data
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - data03:/usr/share/elasticsearch/data
-    # ports:
-    #   - 9202:9202    
+      - data03:/usr/share/elasticsearch/data   
+    networks:
+      - elastic
+
+  ingest01:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    container_name: ingest01
+    environment:
+      - node.name=ingest01
+      - node.roles=ingest
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es02,es03,ingest02
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      # - network.host=127.0.0.1::9202
+      # - path.data=/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data04:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200    
+    networks:
+      - elastic
+
+  ingest02:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    container_name: ingest02
+    environment:
+      - node.name=ingest02
+      - node.roles=ingest
+      - cluster.name=es-docker-cluster
+      - discovery.seed_hosts=es01,es02,es03,ingest01
+      - cluster.initial_master_nodes=es01,es02,es03
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      # - network.host=127.0.0.1::9202
+      # - path.data=/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - data05:/usr/share/elasticsearch/data
+    ports:
+      - 9201:9201    
     networks:
       - elastic
 
@@ -73,8 +120,11 @@ volumes:
     driver: local
   data03:
     driver: local
+  data04:
+    driver: local
+  data05:
+    driver: local
 
 networks:
   elastic:
     driver: bridge
-
