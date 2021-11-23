@@ -23,12 +23,11 @@ func main() {
 		Addresses: []string{
 			"http://localhost:9200",
 			"http://localhost:9201",
-			//"http://localhost:9202",
 		},
 		Transport: &http.Transport{
 			MaxIdleConnsPerHost:   10,
-			ResponseHeaderTimeout: time.Second,
-			DialContext:           (&net.Dialer{Timeout: time.Second}).DialContext,
+			ResponseHeaderTimeout: 5 * time.Second,
+			DialContext:           (&net.Dialer{Timeout: 5 * time.Second}).DialContext,
 			TLSClientConfig: &tls.Config{
 				MaxVersion:         tls.VersionTLS11,
 				InsecureSkipVerify: true,
