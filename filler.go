@@ -25,14 +25,13 @@ func isNumeric(s string) bool {
 }
 
 func main() {
-
 	log.Println("I will fill your database with some data")
 	log.Println(strings.Repeat("-", 37))
 	// Create default Client
 	cfg := elasticsearch.Config{
 		Addresses: []string{
 			"http://localhost:9200",
-			//"http://localhost:9201",
+			"http://localhost:9201",
 			//"http://localhost:9202",
 		},
 		Transport: &http.Transport{
@@ -80,7 +79,7 @@ func main() {
 	createCnf["settings"].(map[string]interface{})["index"] = make(map[string]int)
 	createCnf["settings"].(map[string]interface{})["index"].(map[string]int)["number_of_shards"] = 2
 	// !!!"number_of_replicas" should be equil to 1, use 0 only for experiment!!!
-	createCnf["settings"].(map[string]interface{})["index"].(map[string]int)["number_of_replicas"] = 1
+	createCnf["settings"].(map[string]interface{})["index"].(map[string]int)["number_of_replicas"] = 2
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(createCnf); err != nil {
 		log.Fatalf("Error encoding createCnf: %s", err)
@@ -107,6 +106,7 @@ func main() {
 		line := scanner.Text()
 		go func(i int, line string, col_names []string) {
 			defer wg.Done()
+
 			var body bytes.Buffer
 			request := make(map[string]string)
 			// Build the request body.
@@ -141,7 +141,7 @@ func main() {
 					log.Printf("Error parsing the response body: %s", err)
 				} else {
 					// Print the response status and indexed document version.
-					log.Printf("{i=%d} [%s] %s; version=%d", i, res.Status(), r["result"], int(r["_version"].(float64)))
+					log.Printf("{i=%2d} [%s] %s; version=%d", i, res.Status(), r["result"], int(r["_version"].(float64)))
 				}
 			}
 		}(i, line, col_names)

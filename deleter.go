@@ -18,7 +18,7 @@ func main() {
 	cfg := elasticsearch.Config{
 		Addresses: []string{
 			"http://localhost:9200",
-			//"http://localhost:9201",
+			"http://localhost:9201",
 			//"http://localhost:9202",
 		},
 		Transport: &http.Transport{
