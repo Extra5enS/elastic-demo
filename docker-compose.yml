@@ -72,12 +72,12 @@ services:
       - node.name=ingest01
       - node.roles=ingest
       - cluster.name=es-docker-cluster
-      - discovery.seed_hosts=es01,es02,es03,ingest02
+      - discovery.seed_hosts=es01,es02,es03
       - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      # - network.host=127.0.0.1::9202
-      # - path.data=/usr/share/elasticsearch/data
+      - network.host=0.0.0.0
+      - http.port=9200
     ulimits:
       memlock:
         soft: -1
@@ -96,12 +96,12 @@ services:
       - node.name=ingest02
       - node.roles=ingest
       - cluster.name=es-docker-cluster
-      - discovery.seed_hosts=es01,es02,es03,ingest01
+      - discovery.seed_hosts=es01,es02,es03
       - cluster.initial_master_nodes=es01,es02,es03
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      # - network.host=127.0.0.1::9202
-      # - path.data=/usr/share/elasticsearch/data
+      - network.host=0.0.0.0
+      - http.port=9201
     ulimits:
       memlock:
         soft: -1
