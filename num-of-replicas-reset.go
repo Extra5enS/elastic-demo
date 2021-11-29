@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
@@ -64,9 +65,14 @@ func main() {
 	log.Println(strings.Repeat("-", 37))
 
 	// Scan and Put new settings
+	var number_of_replicas int
+	fmt.Printf("Write numbre_of_replicas, that you want to set: ")
+	fmt.Scanf("%d", &number_of_replicas)
+	log.Println(strings.Repeat("-", 37))
+
 	createCnf := make(map[string]interface{})
 	createCnf["index"] = make(map[string]int)
-	createCnf["index"].(map[string]int)["number_of_replicas"] = 3
+	createCnf["index"].(map[string]int)["number_of_replicas"] = number_of_replicas
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(createCnf); err != nil {
 		log.Fatalf("Error encoding createCnf: %s", err)
