@@ -3,31 +3,36 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"context"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/elastic/go-elasticsearch/v8"
-	"github.com/elastic/go-elasticsearch/v8/esapi"
 )
-
-func isNumeric(s string) bool {
-	_, err := strconv.ParseFloat(s, 64)
-	return err == nil
-}
 
 func main() {
 	log.Println("I will fill your database with some data")
 	log.Println(strings.Repeat("-", 37))
 	// Create default Client
+
+	var (
+		number_of_replicas, numbre_of_shards int
+	)
+	fmt.Printf("Write numbre_of_shards, that you want to set: ")
+	fmt.Scanf("%d\n", &numbre_of_shards)
+	fmt.Printf("Ok, you want to set: %d, interesting\n", numbre_of_shards)
+	log.Println(strings.Repeat("-", 37))
+	fmt.Printf("Write numbre_of_replicas, that you want to set: ")
+	fmt.Scanf("%d\n", &number_of_replicas)
+	fmt.Printf("Ok, you want to set: %d, interesting\n", number_of_replicas)
+	log.Println(strings.Repeat("-", 37))
+
 	cfg := elasticsearch.Config{
 		Addresses: []string{
 			"http://localhost:9200",
@@ -65,6 +70,9 @@ func main() {
 	col_names := strings.Fields(scanner.Text())
 
 	createCnf := make(map[string]interface{})
+	createCnf["index_patterns"] = make([]string, 1)
+	createCnf["index_patterns"].([]string)[0] = "test*"
+
 	createCnf["mappings"] = make(map[string]interface{})
 	createCnf["mappings"].(map[string]interface{})["properties"] = make(map[string]interface{})
 	for _, name := range col_names {
@@ -75,101 +83,42 @@ func main() {
 			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "text"
 		}
 	}
+	createCnf["settings"] = make(map[string]interface{})
+	createCnf["settings"].(map[string]interface{})["index"] = make(map[string]int)
+	createCnf["settings"].(map[string]interface{})["index"].(map[string]int)["number_of_shards"] = numbre_of_shards
+	createCnf["settings"].(map[string]interface{})["index"].(map[string]int)["number_of_replicas"] = number_of_replicas
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(createCnf); err != nil {
 		log.Fatalf("Error encoding createCnf: %s", err)
 	}
 
-	res, err := es.Indices.Create(
-		"test",
-		es.Indices.Create.WithBody(strings.NewReader(buf.String())),
+	putt_res, err := es.Indices.PutTemplate(
+		"test-template",
+		strings.NewReader(buf.String()),
+		es.Indices.PutTemplate.WithOrder(1),
+		//es.Indices.PutTemplate.WithCreate(true),
 	)
 
 	if err != nil {
-		log.Fatalf("new mapping creation error: %s", err)
+		log.Fatalf("Putting new template error: %s", err)
 	} else {
-		log.Println(res)
+		log.Println(putt_res)
 	}
 	log.Println(strings.Repeat("-", 37))
 
-	defer res.Body.Close()
-	// Fill database
-	i := 1
-	var wg sync.WaitGroup
-	for scanner.Scan() {
-		wg.Add(1)
-		line := scanner.Text()
-		go func(i int, line string, col_names []string) {
-			defer wg.Done()
+	defer putt_res.Body.Close()
 
-			var body bytes.Buffer
-			request := make(map[string]string)
-			// Build the request body.
-			for i, field := range strings.Fields(line) {
-				request[col_names[i]] = field
-			}
+	gett_res, err := es.Indices.GetTemplate(
+		es.Indices.GetTemplate.WithName("test-template"),
+		es.Indices.GetTemplate.WithPretty(),
+	)
 
-			if err := json.NewEncoder(&body).Encode(request); err != nil {
-				log.Fatalf("Error encoding createCnf: %s", err)
-			}
-			// Set up the request object.
-			req := esapi.IndexRequest{
-				Index:      "test",
-				DocumentID: strconv.Itoa(i),
-				Body:       strings.NewReader(body.String()),
-				Refresh:    "true",
-			}
-
-			// Perform the request with the client.
-			res, err := req.Do(context.Background(), es)
-			if err != nil {
-				log.Fatalf("Error getting response: %s", err)
-			}
-			defer res.Body.Close()
-
-			if res.IsError() {
-				log.Printf("[%s] Error indexing document ID=%d", res.Status(), i+1)
-			} else {
-				// Deserialize the response into a map.
-				var r map[string]interface{}
-				if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
-					log.Printf("Error parsing the response body: %s", err)
-				} else {
-					// Print the response status and indexed document version.
-					log.Printf("{i=%2d} [%s] %s; version=%d", i, res.Status(), r["result"], int(r["_version"].(float64)))
-				}
-			}
-		}(i, line, col_names)
-		i++
+	if err != nil {
+		log.Fatalf("Getting template error: %s", err)
+	} else {
+		log.Print(gett_res)
 	}
-	wg.Wait()
-
+	gett_res.Body.Close()
 	log.Println(strings.Repeat("-", 37))
 
 }
-
-/*
-`{
-	"mappings": {
-		"properties": {
-			"title": {
-				"type": "text"
-			},
-			"text": {
-				"type": "integer"
-			},
-			"myID": {
-				"type": "integer"
-			},
-			"word": {
-				"type": "text"
-			}
-		}
-	},
-	"settings": {
-		"index": {
-			"number_of_shards": 2,
-			"number_of_replicas": 1
-		}
-	}
-}`*/
