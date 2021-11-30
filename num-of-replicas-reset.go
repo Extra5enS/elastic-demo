@@ -50,6 +50,7 @@ func main() {
 	} else {
 		log.Println(getset_res)
 	}
+	getset_res.Body.Close()
 	log.Println(strings.Repeat("-", 37))
 
 	// Close to change settings
@@ -62,12 +63,13 @@ func main() {
 	} else {
 		log.Println(close_res)
 	}
+	close_res.Body.Close()
 	log.Println(strings.Repeat("-", 37))
 
 	// Scan and Put new settings
 	var number_of_replicas int
 	fmt.Printf("Write numbre_of_replicas, that you want to set: ")
-	fmt.Scanf("%d", &number_of_replicas)
+	fmt.Scanf("%d\n", &number_of_replicas)
 	log.Println(strings.Repeat("-", 37))
 
 	createCnf := make(map[string]interface{})
@@ -82,11 +84,13 @@ func main() {
 		es.Indices.PutSettings.WithIndex("test"),
 		es.Indices.PutSettings.WithPretty(),
 	)
+
 	if err != nil {
 		log.Fatalf("index close error: %s", err)
 	} else {
 		log.Println(potset_res)
 	}
+	potset_res.Body.Close()
 	log.Println(strings.Repeat("-", 37))
 
 	// Open to change settings
@@ -99,6 +103,7 @@ func main() {
 	} else {
 		log.Println(open_res)
 	}
+	open_res.Body.Close()
 
 	log.Println(strings.Repeat("-", 37))
 }
