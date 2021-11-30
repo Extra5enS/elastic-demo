@@ -54,6 +54,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed opening file: %s", err)
 	}
+	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
 	scanner.Split(bufio.ScanLines)
