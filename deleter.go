@@ -47,5 +47,6 @@ func main() {
 	} else {
 		log.Println(res)
 	}
+	res.Body.Close()
 	log.Println(strings.Repeat("-", 37))
 }
