@@ -110,7 +110,7 @@ func main() {
 			}
 
 			if err := json.NewEncoder(&body).Encode(request); err != nil {
-				log.Fatalf("Error encoding createCnf: %s", err)
+				log.Fatalf("Error encoding request: %s", err)
 			}
 			// Set up the request object.
 			req := esapi.IndexRequest{
