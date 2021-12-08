@@ -24,6 +24,13 @@ To shutdown it also use make
 ```
 sudo make clear-single-node
 ```
+## template-setter.go
+Before filling db with data, you must set template to show Elasticsearch cluster how to represent index data. So you next command to set it.
+```
+go run template-setter.go
+```
+After this you may try to fulfill your db or reindex so index in it.
+
 ## filler.go
 Next, you need to fill the server with data. In this case, the server has a single data stream with the index "test". You can use this commend to do it.
 ```
@@ -65,6 +72,15 @@ If you want to experiment with data in ```index="test"``` you may reuse filler.g
 ```
 go run deleter.go
 ```
+
+## resetter.go
+Resetter might be use to change static setting on index. Firstly, you need to set template with correct setting. After you can run:
+```
+go run resseter.go 
+```
+Implementation of this programme in not perfect.
+
+
 
 ## Links
 
