@@ -65,16 +65,6 @@ func main() {
 	col_names := strings.Fields(scanner.Text())
 
 	createCnf := make(map[string]interface{})
-	createCnf["mappings"] = make(map[string]interface{})
-	createCnf["mappings"].(map[string]interface{})["properties"] = make(map[string]interface{})
-	for _, name := range col_names {
-		createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name] = make(map[string]string)
-		if name == "text" || name == "myID" {
-			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "integer"
-		} else {
-			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "text"
-		}
-	}
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(createCnf); err != nil {
 		log.Fatalf("Error encoding createCnf: %s", err)
@@ -173,3 +163,15 @@ func main() {
 		}
 	}
 }`*/
+
+/*
+	createCnf["mappings"] = make(map[string]interface{})
+	createCnf["mappings"].(map[string]interface{})["properties"] = make(map[string]interface{})
+	for _, name := range col_names {
+		createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name] = make(map[string]string)
+		if name == "text" || name == "myID" {
+			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "integer"
+		} else {
+			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "text"
+		}
+	}*/
