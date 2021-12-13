@@ -80,8 +80,9 @@ func main() {
 		if name == "text" || name == "myID" {
 			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "integer"
 		} else {
-			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "text"
+			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "keyword"
 		}
+		//createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["index"] = "not_analyzed"
 	}
 	createCnf["settings"] = make(map[string]interface{})
 	createCnf["settings"].(map[string]interface{})["index"] = make(map[string]int)
