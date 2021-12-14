@@ -48,5 +48,15 @@ func main() {
 		log.Println(getset_res)
 	}
 	getset_res.Body.Close()
+	mapset_res, err := es.Indices.GetMapping(
+		es.Indices.GetMapping.WithIndex("test"),
+		es.Indices.GetMapping.WithPretty(),
+	)
+	if err != nil {
+		log.Fatalf("index get setting error: %s", err)
+	} else {
+		log.Println(mapset_res)
+	}
+	mapset_res.Body.Close()
 	log.Println(strings.Repeat("-", 37))
 }

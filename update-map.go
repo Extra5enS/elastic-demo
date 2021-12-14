@@ -19,11 +19,6 @@ import (
 	"github.com/elastic/go-elasticsearch/v8/esapi"
 )
 
-func isNumeric(s string) bool {
-	_, err := strconv.ParseFloat(s, 64)
-	return err == nil
-}
-
 func main() {
 	log.Println("I will fill your database with some data")
 	log.Println(strings.Repeat("-", 37))
@@ -50,7 +45,7 @@ func main() {
 		//log.Println(es.Info())
 	}
 
-	file, err := os.Open("source/data.txt")
+	file, err := os.Open("source/extra_data.txt")
 	if err != nil {
 		log.Fatalf("failed opening file: %s", err)
 	}
@@ -67,28 +62,24 @@ func main() {
 	createCnf := make(map[string]interface{})
 	createCnf["mappings"] = make(map[string]interface{})
 	createCnf["mappings"].(map[string]interface{})["properties"] = make(map[string]interface{})
-	for _, name := range col_names {
-		createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name] = make(map[string]string)
-		if name == "text" || name == "myID" {
-			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "integer"
-		} else {
-			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "keyword"
-		}
-		//createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["index"] = "not_analyzed"
-	}
+	createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})["arg_num"] = make(map[string]interface{})
+	createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})["arg_num"].(map[string]interface{})["type"] = "long"
 
 	var buf bytes.Buffer
-	if err := json.NewEncoder(&buf).Encode(createCnf); err != nil {
+	// we shouldn't write "mappings : {...}"
+	if err := json.NewEncoder(&buf).Encode(createCnf["mappings"]); err != nil {
 		log.Fatalf("Error encoding createCnf: %s", err)
 	}
+	// on main doc write wrong func args!!!!
+	// https://pkg.go.dev/github.com/elastic/go-elasticsearch@v0.0.0/esapi#IndicesPutMapping
+	// It hasn't WithIndex(...string) method
 
-	res, err := es.Indices.Create(
-		"test",
-		es.Indices.Create.WithBody(strings.NewReader(buf.String())),
+	res, err := es.Indices.PutMapping(
+		[]string{"test"},
+		strings.NewReader(buf.String()),
 	)
-
 	if err != nil {
-		log.Fatalf("new mapping creation error: %s", err)
+		log.Fatalf("update mapping creation error: %s", err)
 	} else {
 		log.Println(res)
 	}
@@ -117,7 +108,7 @@ func main() {
 			// Set up the request object.
 			req := esapi.IndexRequest{
 				Index:      "test",
-				DocumentID: strconv.Itoa(i),
+				DocumentID: strconv.Itoa(50 + i),
 				Body:       strings.NewReader(body.String()),
 				Refresh:    "true",
 			}
@@ -149,41 +140,3 @@ func main() {
 	log.Println(strings.Repeat("-", 37))
 
 }
-
-/*
-`{
-	"mappings": {
-		"properties": {
-			"title": {
-				"type": "text"
-			},
-			"text": {
-				"type": "integer"
-			},
-			"myID": {
-				"type": "integer"
-			},
-			"word": {
-				"type": "text"
-			}
-		}
-	},
-	"settings": {
-		"index": {
-			"number_of_shards": 2,
-			"number_of_replicas": 1
-		}
-	}
-}`*/
-
-/*
-	createCnf["mappings"] = make(map[string]interface{})
-	createCnf["mappings"].(map[string]interface{})["properties"] = make(map[string]interface{})
-	for _, name := range col_names {
-		createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name] = make(map[string]string)
-		if name == "text" || name == "myID" {
-			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "integer"
-		} else {
-			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "text"
-		}
-	}*/
