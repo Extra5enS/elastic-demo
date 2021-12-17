@@ -141,8 +141,8 @@ func NewQuery() map[string]interface{} {
 				simple_query["regexp"].(map[string]interface{})[simple_string_query[0]] = regexpbuf.String()
 
 			default:
-				simple_query["temp"] = make(map[string]interface{})
-				simple_query["temp"].(map[string]interface{})[simple_string_query[0]] = simple_string_query[2]
+				simple_query["term"] = make(map[string]interface{})
+				simple_query["term"].(map[string]interface{})[simple_string_query[0]] = simple_string_query[2]
 			}
 		default:
 			simple_query["range"] = make(map[string]interface{})
@@ -168,7 +168,7 @@ func NewQuery() map[string]interface{} {
 				append(query["query"].(map[string]interface{})["bool"].(map[string][]interface{})["filter"], simple_query)
 		}
 	}
-	//log.Printf("%s", query)
+	log.Printf("%s", query)
 	return query
 }
 
@@ -191,13 +191,13 @@ map[string]interface{}{
 							},
 						},
 					},
-						map[string]interface{}{
-							"term": map[string]interface{}{
-								"title": "test",
-							},
+					map[string]interface{}{
+						"term": map[string]interface{}{
+							"title": "test",
 						},
 					},
 				},
 			},
-		}
+		},
+	}
 */
