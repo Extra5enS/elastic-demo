@@ -82,9 +82,12 @@ func isSpecSym(sym byte) bool {
 // now we can choose only next regexps *<word>, *<word>*, <word>*
 func isAccepterRegexp(regexp string) bool {
 	for i, sym := range regexp {
-		if sym == '*' && (i != 0 || i != len(regexp)-1) {
+		if sym == '*' && (i != 0 && i != len(regexp)-1) {
 			return false
 		}
+	}
+	if regexp[0] != '*' && regexp[len(regexp)-1] != '*' {
+		return false
 	}
 	return true
 }
