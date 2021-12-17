@@ -73,14 +73,17 @@ func main() {
 	defer cluserSet.Body.Close()
 
 	log.Println(`Write regular expression that you want to search:`)
+
 	var regexp string
 	fmt.Scanf("%s", &regexp)
 	log.Println(`Template is:`, regexp)
+
 	var regexpbuf bytes.Buffer
 	if err := NewRegexEncode(&regexpbuf).Encode(strings.NewReader(regexp)); err != nil {
 		log.Fatalf("Error regex encoder: %s", err)
 	}
 	log.Println(`For Elasticsaerch:`, regexpbuf.String())
+
 	var buf bytes.Buffer
 	query := map[string]interface{}{
 		"query": map[string]interface{}{
