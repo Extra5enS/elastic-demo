@@ -126,39 +126,47 @@ func NewQuery() map[string]interface{} {
 	for scanner.Scan() {
 		// simple_query = ["field_name", "operatoin", "field_value"]
 		simple_string_query := strings.Fields(scanner.Text())
+		if len(simple_string_query) != 3 {
+			log.Println("Uncorrect query, please, try to write something another")
+			continue
+		}
+
 		simple_query := make(map[string]interface{})
+		field_setting := make(map[string]interface{})
 		var err error
 		err = nil
-		switch {
-		case simple_string_query[1] == "=":
+		switch simple_string_query[1] {
+		case "=":
 			switch {
 			case isAccepterRegexp(simple_string_query[2]):
-				simple_query["regexp"] = make(map[string]interface{})
 				var regexpbuf bytes.Buffer
 				if err := NewRegexEncode(&regexpbuf).Encode(strings.NewReader(simple_string_query[2])); err != nil {
 					log.Fatalf("Error regex encoder: %s", err)
 				}
-				simple_query["regexp"].(map[string]interface{})[simple_string_query[0]] = regexpbuf.String()
+				field_setting[simple_string_query[0]] = regexpbuf.String()
+				simple_query["regexp"] = field_setting
 
 			default:
 				simple_query["term"] = make(map[string]interface{})
-				simple_query["term"].(map[string]interface{})[simple_string_query[0]] = simple_string_query[2]
+				field_setting[simple_string_query[0]] = simple_string_query[2]
+				simple_query["term"] = field_setting
 			}
 		default:
-			simple_query["range"] = make(map[string]interface{})
-			simple_query["range"].(map[string]interface{})[simple_string_query[0]] = make(map[string]string)
+			range_setting := make(map[string]string)
 			switch simple_string_query[1] {
 			case "<":
-				simple_query["range"].(map[string]interface{})[simple_string_query[0]].(map[string]string)["lt"] = simple_string_query[2]
+				range_setting["lt"] = simple_string_query[2]
 			case "<=":
-				simple_query["range"].(map[string]interface{})[simple_string_query[0]].(map[string]string)["lte"] = simple_string_query[2]
+				range_setting["lte"] = simple_string_query[2]
 			case ">":
-				simple_query["range"].(map[string]interface{})[simple_string_query[0]].(map[string]string)["gt"] = simple_string_query[2]
+				range_setting["gt"] = simple_string_query[2]
 			case ">=":
-				simple_query["range"].(map[string]interface{})[simple_string_query[0]].(map[string]string)["gte"] = simple_string_query[2]
+				range_setting["gte"] = simple_string_query[2]
 			default:
 				err = fmt.Errorf(`Unknowen operation : "%s"`, simple_string_query[1])
 			}
+			field_setting[simple_string_query[0]] = range_setting
+			simple_query["range"] = field_setting
 		}
 		if err != nil {
 			log.Println(err.Error())
@@ -171,33 +179,3 @@ func NewQuery() map[string]interface{} {
 	log.Printf("%s", query)
 	return query
 }
-
-/*
-map[string]interface{}{
-		"query": map[string]interface{}{
-			"bool": map[string]interface{}{
-				"filter": []interface{}{ // if we want to list params, we will use list of maps
-					map[string]interface{}{
-						"range": map[string]interface{}{
-							"myID": map[string]interface{}{
-								"gte": "5",
-							},
-						},
-					},
-					map[string]interface{}{
-						"range": map[string]interface{}{
-							"myID": map[string]interface{}{
-								"lte": "10",
-							},
-						},
-					},
-					map[string]interface{}{
-						"term": map[string]interface{}{
-							"title": "test",
-						},
-					},
-				},
-			},
-		},
-	}
-*/
