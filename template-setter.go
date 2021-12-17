@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
@@ -8,6 +9,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -53,6 +55,21 @@ func main() {
 		//log.Println(es.Info())
 	}
 
+	file, err := os.Open("source/data.txt")
+	if err != nil {
+		log.Fatalf("failed opening file: %s", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+
+	if !scanner.Scan() {
+		log.Fatalf("Empty file")
+	}
+	col_names := strings.Fields(scanner.Text())
+	defer file.Close()
+
 	createCnf := make(map[string]interface{})
 	createCnf["index_patterns"] = make([]string, 1)
 	createCnf["index_patterns"].([]string)[0] = "test*"
@@ -61,6 +78,19 @@ func main() {
 	createCnf["settings"].(map[string]interface{})["index"] = make(map[string]int)
 	createCnf["settings"].(map[string]interface{})["index"].(map[string]int)["number_of_shards"] = numbre_of_shards
 	createCnf["settings"].(map[string]interface{})["index"].(map[string]int)["number_of_replicas"] = number_of_replicas
+
+	createCnf["mappings"] = make(map[string]interface{})
+	createCnf["mappings"].(map[string]interface{})["properties"] = make(map[string]interface{})
+	for _, name := range col_names {
+		createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name] = make(map[string]string)
+		if name == "text" || name == "myID" {
+			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "integer"
+		} else {
+			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "keyword"
+		}
+		//createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["index"] = "not_analyzed"
+	}
+
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(createCnf); err != nil {
 		log.Fatalf("Error encoding createCnf: %s", err)
