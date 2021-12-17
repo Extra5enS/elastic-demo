@@ -12,3 +12,11 @@ clear:
 clear-single-node:
 	docker network rm elastic
 	docker rm es01-test
+
+# write some scripts
+show-filter:
+	echo "Scripts will fullfit db with data from `data.txt` and try to use filter with your data"
+	echo "1) Let's fullfit bd"
+	go run filler.go
+	echo "2) Fillter will select your data for range or temp and try to find"
+	go run filter-demo.go regexpencoder.go
