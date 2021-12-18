@@ -1,4 +1,5 @@
 all:
+	sysctl -w vm.max_map_count=262144
 	docker-compose up
 
 docker-single-node:
@@ -17,6 +18,8 @@ clear-single-node:
 show-filter:
 	echo "Scripts will fullfit db with data from `data.txt` and try to use filter with your data"
 	echo "1) Let's fullfit bd"
-	go run filler.go
+	cat source/data.txt 
+	go run deleter.go 
+	go run filler.go 
 	echo "2) Fillter will select your data for range or temp and try to find"
 	go run filter-demo.go regexpencoder.go

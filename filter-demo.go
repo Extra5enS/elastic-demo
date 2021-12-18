@@ -124,48 +124,50 @@ func NewQuery() map[string]interface{} {
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
-		// simple_query = ["field_name", "operatoin", "field_value"]
-		simple_string_query := strings.Fields(scanner.Text())
-		if len(simple_string_query) != 3 {
+		// simple_query = [<field_name>, <operatoin>, <field_value>]
+		string_query := strings.Fields(scanner.Text())
+		if len(string_query) != 3 {
 			log.Println("Uncorrect query, please, try to write something another")
 			continue
 		}
-
+		// simple_query uses to add new small query to "filter"
 		simple_query := make(map[string]interface{})
+		// place main information for filter about single field
 		field_setting := make(map[string]interface{})
 		var err error
 		err = nil
-		switch simple_string_query[1] {
+		switch string_query[1] {
 		case "=":
 			switch {
-			case isAccepterRegexp(simple_string_query[2]):
+			case isAccepterRegexp(string_query[2]):
+				// it's regex, so we must ecode it in vertion for Elasticsearch
 				var regexpbuf bytes.Buffer
-				if err := NewRegexEncode(&regexpbuf).Encode(strings.NewReader(simple_string_query[2])); err != nil {
+				if err := NewRegexEncode(&regexpbuf).Encode(strings.NewReader(string_query[2])); err != nil {
 					log.Fatalf("Error regex encoder: %s", err)
 				}
-				field_setting[simple_string_query[0]] = regexpbuf.String()
+				field_setting[string_query[0]] = regexpbuf.String()
 				simple_query["regexp"] = field_setting
-
 			default:
+				// it's commone value of field
 				simple_query["term"] = make(map[string]interface{})
-				field_setting[simple_string_query[0]] = simple_string_query[2]
+				field_setting[string_query[0]] = string_query[2]
 				simple_query["term"] = field_setting
 			}
-		default:
+		default: // for "range" query
 			range_setting := make(map[string]string)
-			switch simple_string_query[1] {
+			switch string_query[1] {
 			case "<":
-				range_setting["lt"] = simple_string_query[2]
+				range_setting["lt"] = string_query[2]
 			case "<=":
-				range_setting["lte"] = simple_string_query[2]
+				range_setting["lte"] = string_query[2]
 			case ">":
-				range_setting["gt"] = simple_string_query[2]
+				range_setting["gt"] = string_query[2]
 			case ">=":
-				range_setting["gte"] = simple_string_query[2]
+				range_setting["gte"] = string_query[2]
 			default:
-				err = fmt.Errorf(`Unknowen operation : "%s"`, simple_string_query[1])
+				err = fmt.Errorf(`Unknowen operation : "%s"`, string_query[1])
 			}
-			field_setting[simple_string_query[0]] = range_setting
+			field_setting[string_query[0]] = range_setting
 			simple_query["range"] = field_setting
 		}
 		if err != nil {
@@ -176,6 +178,6 @@ func NewQuery() map[string]interface{} {
 				append(query["query"].(map[string]interface{})["bool"].(map[string][]interface{})["filter"], simple_query)
 		}
 	}
-	log.Printf("%s", query)
+	//log.Printf("%s", query)
 	return query
 }
