@@ -45,7 +45,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("mapping delete error: %s", err)
 	} else {
-		log.Println(res)
+		if res.Status() == "404" {
+			log.Println(`File doesn't exist or already deleted`);
+		} else {
+			log.Println(`File is deleted`);
+		}
 	}
 	res.Body.Close()
 	log.Println(strings.Repeat("-", 37))

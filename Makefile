@@ -16,10 +16,15 @@ clear-single-node:
 
 # write some scripts
 show-filter:
-	echo "Scripts will fullfit db with data from `data.txt` and try to use filter with your data"
-	echo "1) Let's fullfit bd"
-	cat source/data.txt 
-	go run deleter.go 
-	go run filler.go 
-	echo "2) Fillter will select your data for range or temp and try to find"
-	go run filter-demo.go regexpencoder.go
+	@echo "Scripts will fullfit db with data from `data.txt` and try to use filter with your data"
+	@echo "1) Let's fullfit bd. Make sure that you have set template for index!"
+	@cat source/data.txt
+	@echo ""	
+	@go run deleter.go 
+	@echo "Now let's set template to you db"
+	@go run template-setter.go
+	@go run filler.go 
+	@echo "2) Fillter will select your data for range or temp and try to find"
+	@go run filter-demo.go regexpencoder.go
+
+

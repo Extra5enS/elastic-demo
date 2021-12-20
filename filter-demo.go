@@ -46,37 +46,15 @@ func main() {
 	// Search for the indexed documents
 	//
 	// Build the request body.
-	var buf bytes.Buffer
-	log.Println(strings.Repeat("-", 37))
-	log.Println("Enter you query step by step")
 	log.Println(strings.Repeat("-", 37))
 
 	query := NewQuery()
+	res, err := doSearch(es, query, 10)
 
-	if err := json.NewEncoder(&buf).Encode(query); err != nil {
-		log.Fatalf("Error encoding query: %s", err)
-	}
-
-	// Perform the search request.
-	res, err := es.Search(
-		es.Search.WithContext(context.Background()),
-		es.Search.WithIndex("test"),
-		es.Search.WithBody(&buf),
-		es.Search.WithTrackTotalHits(true),
-		es.Search.WithPretty(),
-	)
 	if err != nil {
 		log.Fatalf("Error getting response: %s", err)
 	}
-	defer res.Body.Close()
-	printData(res)
-	log.Println(strings.Repeat("=", 37))
-}
 
-/*
-	Look at data in res
-*/
-func printData(res *esapi.Response) int {
 	if res.IsError() {
 		var e map[string]interface{}
 		if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
@@ -95,10 +73,49 @@ func printData(res *esapi.Response) int {
 	if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
 		log.Fatalf("Error parsing the response body: %s", err)
 	}
+	hits_size := int(r["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64))
+	if hits_size > 10 {
+		log.Println("Number of hits more then default search size")
+		log.Println("We will do other one search with new size")
+
+		res, err := doSearch(es, query, hits_size)
+
+		if err != nil {
+			log.Fatalf("Error getting response: %s", err)
+		}
+
+		if res.IsError() {
+			var e map[string]interface{}
+			if err := json.NewDecoder(res.Body).Decode(&e); err != nil {
+				log.Fatalf("Error parsing the response body: %s", err)
+			} else {
+			// Print the response status and error information.
+				log.Fatalf("[%s] %s: %s",
+					res.Status(),
+					e["error"].(map[string]interface{})["type"],
+					e["error"].(map[string]interface{})["reason"],
+				)
+			}
+		}
+
+		if err := json.NewDecoder(res.Body).Decode(&r); err != nil {
+			log.Fatalf("Error parsing the response body: %s", err)
+		}
+	}
+
+	printData(r)
+
+	log.Println(strings.Repeat("=", 37))
+	res.Body.Close()
+}
+
+/*
+	Look at data in res
+*/
+func printData(r map[string]interface{}) int {
 	// Print the response status, number of results, and request duration.
 	log.Printf(
-		"[%s] %d hits; took: %dms",
-		res.Status(),
+		"Search: %d hits; took: %dms",
 		int(r["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64)),
 		int(r["took"].(float64)),
 	)
@@ -108,6 +125,21 @@ func printData(res *esapi.Response) int {
 	}
 
 	return int(r["hits"].(map[string]interface{})["total"].(map[string]interface{})["value"].(float64))
+}
+
+func doSearch(es *elasticsearch.Client, query map[string]interface{}, hits_size int) (*esapi.Response, error) {
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(query); err != nil {
+		log.Fatalf("Error encoding query: %s", err)
+	}
+	return es.Search(
+		es.Search.WithContext(context.Background()),
+		es.Search.WithIndex("test"),
+		es.Search.WithBody(&buf),
+		es.Search.WithTrackTotalHits(true),
+		es.Search.WithPretty(),
+		es.Search.WithSize(hits_size),
+	)
 }
 
 /*
@@ -120,8 +152,12 @@ func NewQuery() map[string]interface{} {
 				"filter": []interface{}{},
 			},
 		},
+		"sort": map[string]interface{} {},
 	}
 
+	log.Println(strings.Repeat("-", 37))
+	log.Println("Enter you query step by step")
+	log.Println(strings.Repeat("-", 37))
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		// simple_query = [<field_name>, <operatoin>, <field_value>]
@@ -179,5 +215,29 @@ func NewQuery() map[string]interface{} {
 		}
 	}
 	//log.Printf("%s", query)
+	log.Println(strings.Repeat("-", 37))
+	log.Println("Enter sort settings step by step")
+	log.Println(strings.Repeat("-", 37))
+
+	scanner = bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		// string_sort = [<field>, "by" or ":", <setting>]
+		string_sort := strings.Fields(scanner.Text())
+		if len(string_sort) != 3 || (string_sort[1] != "by" && string_sort[1] != ":") {
+			log.Println("Uncorrect query, please, try to write something another")
+			continue
+		}
+		sort_setting := make(map[string]string)
+		switch string_sort[2] {
+		case "asc":
+			sort_setting["order"] = "asc"
+		case "desc":
+			sort_setting["order"] = "desc"
+		default:
+			log.Printf(`Unavalible sort paramert : "%s"`, string_sort[2])
+			continue
+		}
+		query["sort"].(map[string]interface{})[string_sort[0]] = sort_setting
+	}
 	return query
 }
