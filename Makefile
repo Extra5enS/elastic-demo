@@ -15,7 +15,7 @@ clear-single-node:
 	docker rm es01-test
 
 # write some scripts
-show-filter:
+file-db:
 	@echo "Scripts will fullfit db with data from `data.txt` and try to use filter with your data"
 	@echo "1) Let's fullfit bd. Make sure that you have set template for index!"
 	@cat source/data.txt
@@ -23,8 +23,16 @@ show-filter:
 	@go run deleter.go 
 	@echo "Now let's set template to you db"
 	@go run template-setter.go
-	@go run filler.go 
-	@echo "2) Fillter will select your data for range or temp and try to find"
+	@go run filler.go
+
+show-lockal-data:
+	@cat source/data.txt	
+
+show-filter:
+	@echo "Fillter will select your data for range or temp and try to find"
 	@go run filter-demo.go regexpencoder.go
 
-
+reindex-text-index:
+	@go run get-settings.go
+	@go run template-setter.go
+	@go run resetter.go
