@@ -106,7 +106,7 @@ func main() {
 			// Set up the request object.
 			req := esapi.IndexRequest{
 				Index:      "test",
-				DocumentID: strconv.Itoa(i),
+				//DocumentID: strconv.Itoa(i),
 				Body:       strings.NewReader(body.String()),
 				Refresh:    "true",
 			}
