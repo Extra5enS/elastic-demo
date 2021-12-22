@@ -58,34 +58,23 @@ func main() {
 		log.Fatalf("Empty file")
 	}
 	col_names := strings.Fields(scanner.Text())
-	defer file.Close()
 
+	gett_res, err := es.Indices.GetTemplate(
+		es.Indices.GetTemplate.WithName("test-template"),
+		es.Indices.GetTemplate.WithPretty(),
+	)
+	log.Println(gett_res)
 	createCnf := make(map[string]interface{})
-	createCnf["index_patterns"] = make([]string, 1)
-	createCnf["index_patterns"].([]string)[0] = "test*"
+    if err := json.NewDecoder(gett_res.Body).Decode(&createCnf); err != nil {
+        log.Fatalf("Error parsing the response body: %s", err)
+    }
 
-	createCnf["settings"] = make(map[string]interface{})
-	createCnf["settings"].(map[string]interface{})["index"] = make(map[string]int)
-	createCnf["settings"].(map[string]interface{})["index"].(map[string]int)["number_of_shards"] = 3
-	createCnf["settings"].(map[string]interface{})["index"].(map[string]int)["number_of_replicas"] = 3
-
-	createCnf["mappings"] = make(map[string]interface{})
-	createCnf["mappings"].(map[string]interface{})["properties"] = make(map[string]interface{})
-	for _, name := range col_names {
-		createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name] = make(map[string]string)
-		if name == "text" || name == "myID" {
-			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "integer"
-		} else {
-			createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["type"] = "keyword"
-		}
-		//createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})[name].(map[string]string)["index"] = "not_analyzed"
-	}
-	createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})["arg_num"] = make(map[string]interface{})
-	createCnf["mappings"].(map[string]interface{})["properties"].(map[string]interface{})["arg_num"].(map[string]interface{})["type"] = "long"
+	createCnf["test-template"].(map[string]interface{})["mappings"].(map[string]interface{})["properties"].(map[string]interface{})["arg_num"] = make(map[string]interface{})
+	createCnf["test-template"].(map[string]interface{})["mappings"].(map[string]interface{})["properties"].(map[string]interface{})["arg_num"].(map[string]interface{})["type"] = "long"
 
 	var buf bytes.Buffer
 	// we shouldn't write "mappings : {...}"
-	if err := json.NewEncoder(&buf).Encode(createCnf); err != nil {
+	if err := json.NewEncoder(&buf).Encode(createCnf["test-template"]); err != nil {
 		log.Fatalf("Error encoding createCnf: %s", err)
 	}
 	// on main doc write wrong func args!!!!
